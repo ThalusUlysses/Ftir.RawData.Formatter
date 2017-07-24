@@ -1,0 +1,1 @@
+# Ftir.RawData.Formatter
