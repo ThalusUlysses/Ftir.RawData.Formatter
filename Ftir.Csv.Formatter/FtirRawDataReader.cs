@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -7,7 +9,6 @@ namespace Ftir.Csv.Formatter
     class FtirRawDataReader
     {
         private FileInfo _fileInfo;
-        private char _sepChar = ';';
 
         public FtirRawDataReader(string fileName)
         {
@@ -15,12 +16,75 @@ namespace Ftir.Csv.Formatter
             EnsureFileExists();
         }
 
-        public FtirItem[] Read()
+        private char DetectSeparatorCharFromFile(string st)
+        {
+            int countColon = 0;
+            int countComma =0;
+            foreach (char c in st)
+            {
+                if (c == ';')
+                {
+                    countColon++;
+                }
+
+                if (c == ',')
+                {
+                    countComma++;
+                }
+            }
+
+            if (countComma == 0 && countColon == 0)
+            {
+                return '{';
+            }
+
+            if (countComma > countColon)
+            {
+                return ',';
+            }
+
+            return ';';
+        }
+
+        private char DetectDecimalCharFromFile(string st)
+        {
+            int countDot = 0;
+            int countComma = 0;
+            foreach (char c in st)
+            {
+                if (c == ';')
+                {
+                    countDot++;
+                }
+
+                if (c == ',')
+                {
+                    countComma++;
+                }
+            }
+
+            if (countComma == 0 && countDot == 0)
+            {
+                return '{';
+            }
+
+            if (countComma > countDot)
+            {
+                return ',';
+            }
+
+            return '.';
+        }
+
+        public FtirData Read()
         {
             EnsureFileExists();
             bool nextIsData = false;
             FtirItem header = null;
             List<FtirItem> sampleResults = new List<FtirItem>();
+
+            char sepChar = '{';
+            char decChar = '{';
 
             using (FileStream fStm = _fileInfo.OpenRead())
             using (StreamReader sStm = new StreamReader(fStm, System.Text.Encoding.Default))
@@ -30,7 +94,12 @@ namespace Ftir.Csv.Formatter
                 while (sStm.Peek() > 0)
                 {
                     var theLine = sStm.ReadLine();
-                    
+
+                    if (sepChar == '{')
+                    {
+                        sepChar = DetectSeparatorCharFromFile(theLine);
+                    }
+
                     if (string.IsNullOrEmpty(theLine))
                     {
                         continue;
@@ -66,15 +135,15 @@ namespace Ftir.Csv.Formatter
                         continue;
                     }
 
-                    if (invLower.StartsWith("probe;"))
+                    if (invLower.StartsWith($"probe{sepChar}"))
                     {
-                        var items = theLine.Split(_sepChar);
+                        var items = theLine.Split(sepChar);
                         headerArgs.AddRange(items);
                         nextIsData = true;
                         continue;
                     }
 
-                    if (invLower.StartsWith(";;"))
+                    if (invLower.StartsWith($"{sepChar}{sepChar}"))
                     {
                         evalArgs.AddRange(new[] { string.Empty, string.Empty});
                         nextIsData = true;
@@ -92,7 +161,13 @@ namespace Ftir.Csv.Formatter
                             sampleResults.Add(header);
                         }
 
-                        var items = theLine.Split(_sepChar);
+
+                        if (decChar == '{')
+                        {
+                            decChar = DetectDecimalCharFromFile(theLine);
+                        }
+
+                        var items = theLine.Split(sepChar);
 
                         FtirItem item = new FtirItem
                         {
@@ -107,7 +182,13 @@ namespace Ftir.Csv.Formatter
                     }
                 }
             }
-            return sampleResults.ToArray();
+
+            return new FtirData
+            {
+                Data = sampleResults.ToArray(),
+                SeparatorChar = sepChar,
+                DecimalChar = decChar
+            };
         }
 
         private void EnsureFileExists()

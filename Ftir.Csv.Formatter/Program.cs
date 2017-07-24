@@ -9,37 +9,33 @@ namespace Ftir.Csv.Formatter
         static void Main(string[] args)
         {
             bool isInteractive = !args.Any();
-
+            bool isJustHelp = false;
             try
             {
                 ShellCommands shellCmds = new ShellCommands();
                 if (!CommandLine.Parser.Default.ParseArguments(args, shellCmds))
                 {
-                    shellCmds.Files = args.Length == 0
-                        ? Directory.GetFiles(Environment.CurrentDirectory, "*.csv")
-                        : args;
+                    if (args.Length == 0)
+                    {
+                        shellCmds.Files =
+                            Directory.GetFiles(Environment.CurrentDirectory, "*.csv");
+                    }
+                    else if(args.Length == 1 && args[0] == "-?")
+                    {
+                        isJustHelp = true;
+                        isInteractive = true;
+                    }
+                    else
+                    {
+                        shellCmds.Files = args;
+                    }
                 }
 
-                if (shellCmds.Directory != null)
+                if (!isJustHelp)
                 {
-                    shellCmds.Files = Directory.GetFiles(shellCmds.Directory, "*.csv");
+                    Evaluate(shellCmds);
                 }
 
-                if (shellCmds.Files == null)
-                {
-                    shellCmds.Files = Directory.GetFiles(Environment.CurrentDirectory, "*.csv");
-                }
-
-                foreach (string s in shellCmds.Files)
-                {
-                    var items = Read(s);
-
-                    FileInfo fi = new FileInfo(s);
-                    string path = EnsureOutDirectory(fi.DirectoryName);
-                    
-                    path = Path.Combine(path, fi.Name);
-                    Write(items, path);
-                }
             }
             catch (Exception e)
             {
@@ -51,11 +47,36 @@ namespace Ftir.Csv.Formatter
             {
                 Console.WriteLine();
                 Console.WriteLine("Press any key to exit...");
-                Console.ReadLine();
+                Console.ReadKey();
             }
         }
 
-        private static FtirItem[] Read(string s)
+        private static void Evaluate(ShellCommands shellCmds)
+        {
+            if (shellCmds.Directory != null)
+            {
+                shellCmds.Files = Directory.GetFiles(shellCmds.Directory, "*.csv");
+            }
+
+            if (shellCmds.Files == null)
+            {
+                shellCmds.Files = Directory.GetFiles(Environment.CurrentDirectory, "*.csv");
+            }
+
+
+            foreach (string s in shellCmds.Files)
+            {
+                var items = Read(s);
+
+                FileInfo fi = new FileInfo(s);
+                string path = EnsureOutDirectory(fi.DirectoryName);
+
+                path = Path.Combine(path, fi.Name);
+                Write(items, path, shellCmds.KeepCsvFormat);
+            }
+        }
+
+        private static FtirData Read(string s)
         {
             Console.Write($"Read data from {s}");
 
@@ -83,11 +104,11 @@ namespace Ftir.Csv.Formatter
             return t;
         }
 
-        private static void  Write(FtirItem[] s, string name)
+        private static void  Write(FtirData s, string name, bool keep)
         {
             Console.Write($"Write output to file  output directory {name}");
 
-            FtirRawDataWriter wrt = new FtirRawDataWriter(name);
+            FtirRawDataWriter wrt = new FtirRawDataWriter(name, keep);
 
             wrt.Write(s);
 

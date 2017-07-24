@@ -1,37 +1,37 @@
+using System.Globalization;
 using System.IO;
 using System.Text;
-using CommandLine;
-using CommandLine.Text;
 
 namespace Ftir.Csv.Formatter
 {
     class FtirRawDataWriter
     {
         private FileInfo _fileInfo;
-        private string _sepChar = ",";
+        private bool _keepPassedFromat;
 
-        public FtirRawDataWriter(string fileName)
+        public FtirRawDataWriter(string fileName, bool keepPassedFromat)
         {
+            _keepPassedFromat = keepPassedFromat;
             _fileInfo = new FileInfo(fileName);
             EnsureFileExists();
         }
 
-        public void Write(FtirItem[] items)
+        public void Write(FtirData items)
         {
             EnsureFileExists();
 
             using (FileStream fStm = _fileInfo.Create())
             using (StreamWriter sStm = new StreamWriter(fStm, Encoding.Default))
             {
-                foreach (FtirItem item in items)
+                foreach (FtirItem item in items.Data)
                 {
-                    var data = GetItemString(item.Tuple);
+                    var data = GetItemString(item.Tuple, items.SeparatorChar, items.DecimalChar);
                     sStm.WriteLine(data);
                 }
             }
         }
 
-        private string GetItemString(string[] items)
+        private string GetItemString(string[] items,char sepChar, char decChar)
         {
             StringBuilder b = new StringBuilder();
 
@@ -39,16 +39,39 @@ namespace Ftir.Csv.Formatter
             {
                 if (b.Length > 0 || string.IsNullOrEmpty(item))
                 {
-                    b.Append(_sepChar);
+                    if (_keepPassedFromat)
+                    {
+                        b.Append(sepChar);
+                    }
+                    else
+                    {
+                        b.Append(GetSeparatorChar(decChar));
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(item))
                 {
-                    b.Append(item.Replace(',', '.'));
+                    var replaced = item;
+                    if (!_keepPassedFromat)
+                    {
+                        replaced = replaced.Replace($"{decChar}",CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator);
+                    }
+
+                    b.Append(replaced);
                 }
             }
 
             return b.ToString();
+        }
+
+        private char GetSeparatorChar(char c)
+        {
+            if (c == '.')
+            {
+                return ',';
+            }
+
+            return ';';
         }
 
         private void EnsureFileExists()
@@ -57,21 +80,6 @@ namespace Ftir.Csv.Formatter
             {
                 throw new FileNotFoundException($"The file {_fileInfo.FullName} already exists. Check file name or file exists");
             }
-        }
-    }
-
-    public class ShellCommands
-    {
-        [OptionArray('f', "files", HelpText = "Formats a set of data files into to valid csv files. Examle: Ftir.Csv.Formatter.exe -a \"C:\\temp\\160802_GrapeScan P30.csv\" \"C:\\temp\\160802_GrapeScan P31.csv\" \"C:\\temp\\160802_GrapeScan P32.csv\"")]
-        public string[] Files { get; set; }
-
-        [Option('d',"directory",HelpText = "Formats all files within a directory to valid csv files. Example Ftir.Csv.Formatter.exe -d \"C:\\temp\\160802_GrapeScan\"")]
-        public string Directory { get; set; }
-
-        [HelpOption(HelpText = "Dispaly this help screen.")]
-        public string GetUsage()
-        {
-            return HelpText.AutoBuild(this);
         }
     }
 }

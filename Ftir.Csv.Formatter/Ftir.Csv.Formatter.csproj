@@ -53,11 +53,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FtirData.cs" />
     <Compile Include="FtirItem.cs" />
     <Compile Include="FtirRawDataReader.cs" />
     <Compile Include="FtirRawDataWriter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShellCommands.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
