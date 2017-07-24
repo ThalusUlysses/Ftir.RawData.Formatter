@@ -4,9 +4,6 @@
 !**/ninja.exe
 !**/symsrv.dll
 !**/symstore.exe
-!LCInst/RCDrivers/Test/Automated.Python/codeduitests/*.dll
-!installer/pyinstaller/**/*.dll
-!installer/pyinstaller/**/*.exe
 **/*.egg-info
 **/*.ninja
 **/.idea/
@@ -74,9 +71,3 @@ TestResults/
 packages/
 testresult.xml
 Thumbs.db
-
-# don't ignore buildtools binaries
-!buildtools/bin
-!buildtools/bin/
-!buildtools/bin/*
-!buildtools/bin/**/*
