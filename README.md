@@ -1,6 +1,6 @@
 # Foss (Winescan) FTIR Raw Data Fromatter
 The FTIR raw data formatter is able to apply formats to existing raw data
-fo Foss Winescan(R) csv files. Basically the output data looks something like this:
+for Foss Winescan(R) *.csv* files. Basically the output data looks something like this:
 
 ```
 Job name: 160802_Zatopack P30 (1)
@@ -21,14 +21,14 @@ Probe;Dichte;Gluc;Fruct;pH;Säure;Ws.;Äs.;fl.Sre.;Glucons.;Alk;Glyc;NH4;NOPA;Da
 
 The above is somehow humanized but far from beeing a valid csv at all. The formatter 
 switches the "Headlines" such as "Job Name" to columns and prettifies it for beeing
-machine readable as real csv.
+machine readable as "real" csv.
 
 # How to to use the fromatter
 The formatter is a small console based tool which makes the described transformation.
 
 ```
   -f, --files         Formats a set of data files into to valid csv files.
-                      Examle: Ftir.Csv.Formatter.exe -a
+                      Examle: Ftir.Csv.Formatter.exe -f
                       "C:\temp\160802_GrapeScan P30.csv"
                       "C:\temp\160802_GrapeScan P31.csv"
                       "C:\temp\160802_GrapeScan P32.csv"
@@ -42,16 +42,16 @@ The formatter is a small console based tool which makes the described transforma
 
   --help              Dispaly this help screen.
 ```
-
+Formatted *.csv* files are put in a folder "Formatted" next to the file location
+with the same name as the source file.
 ## Double Click
 Using the fromatter as "Double Click" executable it will perfom a format / 
 transformation to all csv file that are located next to the executable.
 ## Files
 Using the formatter executable to perform format / transformation to a set
-of files file. Pass the full qualifed path as arguments to the executable.
+of files. Pass the full qualifed path as arguments to the executable.
 ```
 Ftir.Csv.Formatter.exe -f "<file1.csv>" "file2.csv"
-
 ```
 ## Directory
 Using the formatter executable to perform format / transformation to files
@@ -62,12 +62,11 @@ Ftir.Csv.exe -d "c:\temp\<mycoolsamples>"
 ```
 ## Keep the csv format
 When exchanging csv over cultural habitats such like En-Us for US-America or De-En
-where diffrent language settings for ',' or '.' appear there is a option that prevents
-converting ',' to '.' and vice vers.
-
+where diffrent language settings for ',' or '.' appear there is an option that prevents
+converting ',' to '.' and vice versa.
 ```
 Ftir.Csv.exe -d "c:\temp\<mycoolsamples>" -k
 ```
-with the **-k** option the ',' or '.' (and ',' or ';') is kept according to the
-chars used in the source files. 
-The formatter executable is able to detect weather it is ',' and ';' or '.' and ','.
+with the *-k* option the ',' or '.' (and ',' or ';') is kept according to the
+chars used in the source files. The formatter executable is able to detect 
+weather it is ',' and ';' or '.' and ','.
