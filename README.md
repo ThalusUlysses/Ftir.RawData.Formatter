@@ -27,20 +27,20 @@ machine readable as "real" csv.
 The formatter is a small console based tool which makes the described transformation.
 
 ```
-  -f, --files         Formats a set of data files into to valid csv files.
-                      Examle: Ftir.Csv.Formatter.exe -f
-                      "C:\temp\160802_GrapeScan P30.csv"
-                      "C:\temp\160802_GrapeScan P31.csv"
-                      "C:\temp\160802_GrapeScan P32.csv"
+-f, --files      Formats a set of data files into to valid csv files.
+                 Examle: Ftir.Csv.Formatter.exe -a
+                 "C:\temp\160802_GrapeScan P30.csv"
+                 "C:\temp\160802_GrapeScan P31.csv"
+                 "C:\temp\160802_GrapeScan P32.csv"
 
-  -d, --directory     Formats all files within a directory to valid csv files.
-                      Example Ftir.Csv.Formatter.exe -d
-                      "C:\temp\160802_GrapeScan"
+-d, --directory  Formats all files within a directory to valid csv files.
+                 Example Ftir.Csv.Formatter.exe -d
+                 "C:\temp\160802_GrapeScan"
 
-  -k, --keepFormat    (Default: True) Keeps the csv format for decimal and
-                      seperator char
+-k, --myLocales  (Default: False) Changes the separator char and the
+                 numerical separator my locales (e.g '.' to ',')
 
-  --help              Dispaly this help screen.
+--help           Dispaly this help screen.
 ```
 Formatted *.csv* files are put in a folder "Formatted" next to the file location
 with the same name as the source file.
