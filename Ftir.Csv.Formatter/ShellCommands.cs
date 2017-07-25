@@ -11,8 +11,8 @@ namespace Ftir.Csv.Formatter
         [Option('d',"directory",HelpText = "Formats all files within a directory to valid csv files. Example Ftir.Csv.Formatter.exe -d \"C:\\temp\\160802_GrapeScan\"")]
         public string Directory { get; set; }
 
-        [Option('k', "keepFormat", HelpText = "Keeps the csv format for decimal and seperator char", DefaultValue = true)]
-        public bool KeepCsvFormat { get; set; }
+        [Option('k', "myLocales", HelpText = "Changes the separator char and the numerical separator my locales (e.g '.' to ',')", DefaultValue = false)]
+        public bool ToMyLocalFormat { get; set; }
 
         [HelpOption(HelpText = "Dispaly this help screen.")]
         public string GetUsage()

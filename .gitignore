@@ -23,7 +23,7 @@
 *.dll
 *.dotsettings
 *.err
-*.exe
+#*.exe
 *.feature.cs
 *.g.cs
 *.gif
@@ -63,6 +63,7 @@
 .vscode/
 /Output/
 /Output/3rdParty/
+/Examples/Data/Formatted/
 /packages.config
 bin/
 obj/

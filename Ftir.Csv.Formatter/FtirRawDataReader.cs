@@ -52,7 +52,7 @@ namespace Ftir.Csv.Formatter
             int countComma = 0;
             foreach (char c in st)
             {
-                if (c == ';')
+                if (c == '.')
                 {
                     countDot++;
                 }

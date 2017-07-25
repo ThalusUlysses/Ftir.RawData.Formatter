@@ -7,11 +7,11 @@ namespace Ftir.Csv.Formatter
     class FtirRawDataWriter
     {
         private FileInfo _fileInfo;
-        private bool _keepPassedFromat;
+        private bool _toMyLocalesFormat;
 
-        public FtirRawDataWriter(string fileName, bool keepPassedFromat)
+        public FtirRawDataWriter(string fileName, bool toMyLocalesFormat)
         {
-            _keepPassedFromat = keepPassedFromat;
+            _toMyLocalesFormat = toMyLocalesFormat;
             _fileInfo = new FileInfo(fileName);
             EnsureFileExists();
         }
@@ -39,20 +39,20 @@ namespace Ftir.Csv.Formatter
             {
                 if (b.Length > 0 || string.IsNullOrEmpty(item))
                 {
-                    if (_keepPassedFromat)
+                    if (_toMyLocalesFormat)
                     {
-                        b.Append(sepChar);
+                        b.Append(GetSeparatorChar(CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator));
                     }
                     else
                     {
-                        b.Append(GetSeparatorChar(decChar));
+                        b.Append(sepChar);
                     }
                 }
 
                 if (!string.IsNullOrEmpty(item))
                 {
                     var replaced = item;
-                    if (!_keepPassedFromat)
+                    if (_toMyLocalesFormat)
                     {
                         replaced = replaced.Replace($"{decChar}",CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator);
                     }
@@ -64,9 +64,9 @@ namespace Ftir.Csv.Formatter
             return b.ToString();
         }
 
-        private char GetSeparatorChar(char c)
+        private char GetSeparatorChar(string c)
         {
-            if (c == '.')
+            if (c == ".")
             {
                 return ',';
             }

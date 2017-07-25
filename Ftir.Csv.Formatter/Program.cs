@@ -72,7 +72,7 @@ namespace Ftir.Csv.Formatter
                 string path = EnsureOutDirectory(fi.DirectoryName);
 
                 path = Path.Combine(path, fi.Name);
-                Write(items, path, shellCmds.KeepCsvFormat);
+                Write(items, path, shellCmds.ToMyLocalFormat);
             }
         }
 
@@ -104,11 +104,11 @@ namespace Ftir.Csv.Formatter
             return t;
         }
 
-        private static void  Write(FtirData s, string name, bool keep)
+        private static void  Write(FtirData s, string name, bool toMylocales)
         {
             Console.Write($"Write output to file  output directory {name}");
 
-            FtirRawDataWriter wrt = new FtirRawDataWriter(name, keep);
+            FtirRawDataWriter wrt = new FtirRawDataWriter(name, toMylocales);
 
             wrt.Write(s);
 
