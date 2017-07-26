@@ -6,10 +6,18 @@ using System.Linq;
 
 namespace Ftir.Csv.Formatter
 {
+    /// <summary>
+    /// Implements <see cref="FtirRawDataReader"/> such like <see cref="Read"/> FTIR
+    /// *.csv raw data
+    /// </summary>
     class FtirRawDataReader
     {
-        private FileInfo _fileInfo;
+        private readonly FileInfo _fileInfo;
 
+        /// <summary>
+        /// Creates an instance of <see cref="FtirRawDataReader"/> with the passed parameters
+        /// </summary>
+        /// <param name="fileName">Pass the file name to read the unformatted data from</param>
         public FtirRawDataReader(string fileName)
         {
             _fileInfo = new FileInfo(fileName);
@@ -76,10 +84,14 @@ namespace Ftir.Csv.Formatter
             return '.';
         }
 
+        /// <summary>
+        /// Reads a set of <see cref="FtirData"/> from a specified file
+        /// </summary>
+        /// <returns>Returns a set of <see cref="FtirData"/> filled with the read parameters</returns>
+        /// <exception cref="FileNotFoundException"></exception>
         public FtirData Read()
         {
             EnsureFileExists();
-            bool nextIsData = false;
             FtirItem header = null;
             List<FtirItem> sampleResults = new List<FtirItem>();
 
@@ -89,17 +101,10 @@ namespace Ftir.Csv.Formatter
             using (FileStream fStm = _fileInfo.OpenRead())
             using (StreamReader sStm = new StreamReader(fStm, System.Text.Encoding.Default))
             {
-                List<string> headerArgs = new List<string>();
-                List<string> evalArgs = new List<string>();
                 while (sStm.Peek() > 0)
                 {
                     var theLine = sStm.ReadLine();
-
-                    if (sepChar == '{')
-                    {
-                        sepChar = DetectSeparatorCharFromFile(theLine);
-                    }
-
+                    
                     if (string.IsNullOrEmpty(theLine))
                     {
                         continue;
@@ -107,79 +112,39 @@ namespace Ftir.Csv.Formatter
 
                     var invLower = theLine.ToLowerInvariant();
 
-                    if (invLower.StartsWith("job name"))
+                    if (invLower.StartsWith("job name") || invLower.StartsWith("collection date") ||
+                        invLower.StartsWith("job type") || invLower.StartsWith($"{sepChar}{sepChar}"))
                     {
-                        int idx = invLower.IndexOf(':');
-
-                        headerArgs.Add(theLine.Substring(0,idx));
-                        evalArgs.Add(theLine.Substring(idx + 1).Trim());
                         continue;
                     }
 
-                    if (invLower.StartsWith("collection date"))
+                    if (sepChar == '{')
                     {
-                        int idx = invLower.IndexOf(':');
-
-                        headerArgs.Add(theLine.Substring(0, idx));
-                        evalArgs.Add(theLine.Substring(idx + 1).Trim());
-                        continue;
+                        sepChar = DetectSeparatorCharFromFile(theLine);
                     }
 
-
-                    if (invLower.StartsWith("job type"))
-                    {
-                        int idx = invLower.IndexOf(':');
-
-                        headerArgs.Add(theLine.Substring(0, idx));
-                        evalArgs.Add(theLine.Substring(idx + 1).Trim());
-                        continue;
-                    }
+                    var items = theLine.Split(sepChar);
 
                     if (invLower.StartsWith($"probe{sepChar}"))
                     {
-                        var items = theLine.Split(sepChar);
-                        headerArgs.AddRange(items);
-                        nextIsData = true;
+                        if (header == null)
+                        {
+                            header = new FtirItem {Tuple = items};
+                        }
                         continue;
                     }
 
-                    if (invLower.StartsWith($"{sepChar}{sepChar}"))
+                    if (decChar == '{')
                     {
-                        evalArgs.AddRange(new[] { string.Empty, string.Empty});
-                        nextIsData = true;
+                        decChar = DetectDecimalCharFromFile(theLine);
                     }
 
-                    if (nextIsData)
+                    FtirItem item = new FtirItem
                     {
-                        if (header == null)
-                        {
-                            header = new FtirItem
-                            {
-                                Tuple = headerArgs.ToArray()
-                            };
+                        Tuple = items
+                    };
 
-                            sampleResults.Add(header);
-                        }
-
-
-                        if (decChar == '{')
-                        {
-                            decChar = DetectDecimalCharFromFile(theLine);
-                        }
-
-                        var items = theLine.Split(sepChar);
-
-                        FtirItem item = new FtirItem
-                        {
-                            Tuple = evalArgs.Concat(items).ToArray()
-                        };
-
-                        evalArgs = new List<string>();
-
-                        sampleResults.Add(item);
-
-                        nextIsData = false;
-                    }
+                    sampleResults.Add(item);
                 }
             }
 
@@ -187,7 +152,8 @@ namespace Ftir.Csv.Formatter
             {
                 Data = sampleResults.ToArray(),
                 SeparatorChar = sepChar,
-                DecimalChar = decChar
+                DecimalChar = decChar,
+                Header = header
             };
         }
 
