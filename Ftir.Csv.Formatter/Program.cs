@@ -12,7 +12,7 @@ namespace Ftir.Csv.Formatter
         static bool _isJustHelp = false;
         static void Main(string[] args)
         {
-            ;ShellCommands shCmds = null;
+            ShellCommands shCmds = null;
             try
             {
                 _isInteractive = !args.Any() || Debugger.IsAttached;

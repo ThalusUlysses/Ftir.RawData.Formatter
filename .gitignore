@@ -64,6 +64,7 @@
 /Output/
 /Output/3rdParty/
 /Examples/Data/Formatted/
+/Examples/Data/
 /packages.config
 bin/
 obj/

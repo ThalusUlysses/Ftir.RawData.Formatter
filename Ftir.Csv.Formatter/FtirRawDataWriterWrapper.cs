@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 namespace Ftir.Csv.Formatter
@@ -41,7 +42,29 @@ namespace Ftir.Csv.Formatter
 
         bool IsWineScanData(FtirData items)
         {
-            return items.Header.Tuple.Any(i => i.ToLowerInvariant() == "f-so2");
-        }
+			
+			if (items.Header.Tuple.Any(i => i.ToLowerInvariant() == "f-so2"))
+			{
+				return true;
+			}
+
+			var idx = GetIndexOfColumn("produkt", items);
+
+			return items.Data.Select(i => i.Tuple[idx]).Any(i => i.ToLowerInvariant().Contains("wein"));
+		}
+
+		int GetIndexOfColumn(string name,FtirData items)
+		{
+			int idx = 0;
+			for (int i = 0; i < items.Header.Tuple.Length; i++)
+			{
+				if (items.Header.Tuple[i].ToLowerInvariant() == name)
+				{
+					return i;
+				}
+			}
+
+			throw new ArgumentException($"Invalid column name {name}");
+		}
     }
 }
